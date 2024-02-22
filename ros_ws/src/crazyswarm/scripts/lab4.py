@@ -17,6 +17,7 @@ def build_argparser(parent_parsers=[]):
 def rose_curve(groupState, a, n, d):
     crazyflies = groupState.crazyflies
     timeHelper = groupState.timeHelper
+    all_positions = []
 
     # TODO: Step 1, Parametric Equations of Rose Curve
     # make the appropriate parametric equations
@@ -32,7 +33,7 @@ def rose_curve(groupState, a, n, d):
     #TODO: Step 2, Set appropriate start and end times (min and max values of t)
     # You may need to add an if statement...
     start_time = 0
-    end_time = 0
+    end_time = 1
 
     #TODO: Step 3, set appropriate time scaling factor
     time_stretch_factor = 1
@@ -65,12 +66,25 @@ def rose_curve(groupState, a, n, d):
             # Send command to crazyflie
             cf.cmdPosition(position)
 
+            # Keep track of all positions
+            all_positions.append(position)
         # Sleep for 1/Hz seconds
         timeHelper.sleepForRate(Hz)
 
     # Tell each crazyflie we are stopping streaming low-level commands
     for cf in crazyflies:
         cf.notifySetpointsStop()
+
+    # Check max velocity
+    # Gather first differences (change in each coordinate each timestep)
+    differences = np.diff(all_positions, axis=0)
+    # Get euclidean distance for each timestep
+    distances = np.linalg.norm(differences, axis=1)
+
+    # Distance traveled at each timestep / time for each timestep
+    velocities = distances / (1/Hz)
+
+    print('Max velocity: ', np.max(velocities))
 
 
 # TODO: Part 3: Your function here:
@@ -79,8 +93,6 @@ def rose_curve(groupState, a, n, d):
 
 def main():
     parser = build_argparser()
-    # if isinstance(args, str):
-    #     args = args.split()
     args, unknown = parser.parse_known_args()
     sim = args.sim
 
@@ -104,7 +116,6 @@ def main():
     takeoff(groupState, height=1, duration=3)
     rose_curve(groupState, 1, 1, 3)
     land(groupState, 0, 3)
-    plt.show()
 
 if __name__ == '__main__':
     main()
