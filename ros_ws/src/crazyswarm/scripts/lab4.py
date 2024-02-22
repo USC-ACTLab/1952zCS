@@ -79,9 +79,9 @@ def rose_curve(groupState, a, n, d):
 
 def main():
     parser = build_argparser()
-    if isinstance(args, str):
-        args = args.split()
-    args, unknown = parser.parse_known_args(args)
+    # if isinstance(args, str):
+    #     args = args.split()
+    args, unknown = parser.parse_known_args()
     sim = args.sim
 
     if sim:
